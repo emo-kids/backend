@@ -124,6 +124,7 @@
 			</div>
 			<a href="https://github.com/auduno/clmtrackr"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_green_007200.png" alt="Fork me on GitHub"></a>
 			<script>
+				var numShown = 0;
 				var vid = document.getElementById('videoel');
 				var overlay = document.getElementById('overlay');
 				var overlayCC = overlay.getContext('2d');
@@ -231,7 +232,7 @@
 				var svg = d3.select("#emotion_chart").append("svg")
 					.attr("width", width + margin.left + margin.right)
 					.attr("height", height + margin.top + margin.bottom)
-				
+
 				svg.selectAll("rect").
 				  data(emotionData).
 				  enter().
@@ -266,6 +267,13 @@
 				  attr("transform", "translate(0, 18)").
 				  attr("class", "yAxis");
 				function updateData(data) {
+					while (numShown < 10)
+						for (var i = 0; i < data.length; i++) {
+							console.log(data[i].emotion, data[i].value)
+							numShown++
+						}
+
+					debugger
 					// update
 					var rects = svg.selectAll("rect")
 						.data(data)
