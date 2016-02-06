@@ -23,11 +23,5 @@ def handle_emotions(emotions):
 	print(request.sid, emotions)
 	emit("emotions", [request.sid] + emotions, namespace='/vis', broadcast=True)
 
-# @socketio.on('vis')
-# def handle_vis(vis):
-# 	print("handle_vis")
-# 	# emit('vis', {'user_id': request.sid, 'emotions': vis}, namespace='/vis')
-
-
 if __name__ == '__main__':
     socketio.run(app)
