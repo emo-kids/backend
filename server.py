@@ -20,8 +20,8 @@ def vis():
 
 @socketio.on('emotions')
 def handle_emotions(emotions):
-	print(request.sid)
-	emit("emotions", {'user_id': request.sid, 'emotions': emotions}, namespace='/vis', broadcast=True)
+	print(request.sid, emotions)
+	emit("emotions", [request.sid] + emotions, namespace='/vis', broadcast=True)
 
 # @socketio.on('vis')
 # def handle_vis(vis):

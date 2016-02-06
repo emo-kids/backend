@@ -140,7 +140,6 @@
 			    var dataBuffer = [];
 				
 			    function sendData(data) {
-			    	var data = {emotions: data}
 			    	console.log("got here", isConnected)
 
 			    	console.log(data)
@@ -294,8 +293,7 @@
 				  attr("transform", "translate(0, 18)").
 				  attr("class", "yAxis");
 				function updateData(data) {
-					sendData(data.map(function (obj){return obj}))
-
+					sendData(data.map(function (obj){return obj.value}))
 					// update
 					var rects = svg.selectAll("rect")
 						.data(data)
