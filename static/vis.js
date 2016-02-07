@@ -124,12 +124,11 @@ function updateCircle(circle, person) {
   circle.y = circle._y * p;
   var intensity = person[0] + person[1] + person[2] + person[3]
   circle.scaleX = circle.scaleY = intensity * p * .5;
-
   circle.alpha = 1 
 }
 
 Visualizer.prototype.onData = function(data) {
-  // console.log("emoting")
+  console.log("emoting")
 
   var id = data["user"]
   var count = data["count"]
@@ -207,10 +206,11 @@ function init() {
   vis = new Visualizer()
 
   socket.on('connect', function() {
-    // console.log("connected to "+ endpoint)
+    console.log("connected to "+ endpoint)
   })
 
   socket.on('emotions', vis.onData.bind(vis))
+  socket.on('disconnected', function(sid) { console.log(sid) })
 }
 
 window.addEventListener('load', init, false)

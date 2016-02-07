@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, emit, send
+from flask_socketio import SocketIO, emit, send, disconnect
 from operator import add
 from math import sqrt
-# import MySQLdb
+#import MySQLdb
 
-# db = MySQLdb.connect(host="localhost", user="root", passwd="emokids", db="emokids")
-# cursor = db.cursor()
+#db = MySQLdb.connect(host="localhost", user="root", passwd="emokids1", db="emokids")
+#cursor = db.cursor()
 
 recent_history = {}
 
@@ -36,10 +36,21 @@ def handle_emotions(emotions):
     avg = []
     for sums in final_sums:
 		  avg.append(sums/number_of_people)
-    emotions_RGB_scale = []
     emit("emotions", {'user': request.sid, 'count':len(recent_history), 'emotions': emotions, 'averages': avg}, namespace='/vis', broadcast=True)
-    # cursor.execute("INSERT INTO emotions VALUES (NULL, %1.8f, %1.8f, %1.8f, %1.8f, NOW())", emotions(0), emotions(1), emotions(2), emotions(3))
+    # cursor.execute("INSERT INTO emotions VALUES (NULL, %s, %s, %s, %s, %s, NOW());", [(request.sid), emotions[0], emotions[1], emotions[2], emotions[3]])
     # db.commit()
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    try:
+        print(request.sid, " disconnected")
+        emit('disconnected', request.sid, namespace='/vis', broadcast=True)
+    except:
+        pass
+
+@socketio.on_error_default
+def default_error_handler(e):
+    pass
 
 if __name__ == '__main__':
     socketio.run(app)
