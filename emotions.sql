@@ -10,9 +10,4 @@ CREATE TABLE emotions (
   timestamp TIMESTAMP NOT NULL
 );
 
-SELECT (angry+sad+surprised+happy)/4
-FROM (
-  SELECT sid, angry, sad, surprised, happy, MAX(timestamp)
-  FROM emotions
-  GROUP BY sid
-  ) as average;
+INSERT INTO emotions VALUES (NULL, , , , ,);
