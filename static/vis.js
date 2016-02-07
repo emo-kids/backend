@@ -88,8 +88,6 @@ function generateColors(person) {
 function newCircle(person) {
   var circle = new Shape()
   var colors = generateColors(person)
-  console.log("colors:")
-  console.log(colors)
   circle.graphics.beginFill('rgb('+colors[0]+','+colors[1]+','+colors[2]+')').drawCircle(circle.x, circle.y, 50);
   var a = Math.random() * Math.PI * 2,
       d = Math.random() * 110 + 40;
@@ -128,7 +126,7 @@ function updateCircle(circle, person) {
 }
 
 Visualizer.prototype.onData = function(data) {
-  console.log("emoting")
+  // console.log("emoting")
 
   var id = data["user"]
   var count = data["count"]
@@ -197,6 +195,19 @@ Visualizer.prototype.tick = function() {
   stage.update()
 }
 
+Visualizer.prototype.onDisconnect = function(id) {
+  console.log(id, "disconnected")
+  circle = this._circles[id]
+  if (typeof circle === "undefined") {
+    return
+  }
+  delete(this._people[id])
+  delete(this._circles[id])
+  circle.parent.removeChild(circle)
+  backCircles.removeChild(circle)
+  frontCircles.removeChild(circle)
+}
+
 function tick() {
   vis.tick()
 }
@@ -210,7 +221,12 @@ function init() {
   })
 
   socket.on('emotions', vis.onData.bind(vis))
-  socket.on('disconnected', function(sid) { console.log(sid) })
+  socket.on('disconnected', vis.onDisconnect.bind(vis))
+}
+
+function fin() {
+  socket.emit('disconnect', socket.id)
 }
 
 window.addEventListener('load', init, false)
+window.addEventListener('beforeunload', fin, false)
