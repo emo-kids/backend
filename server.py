@@ -2,10 +2,10 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit, send, disconnect
 from operator import add
 from math import sqrt
-import MySQLdb
+#import MySQLdb
 
-db = MySQLdb.connect(host="localhost", user="root", passwd="emokids1", db="emokids")
-cursor = db.cursor()
+#db = MySQLdb.connect(host="localhost", user="root", passwd="emokids1", db="emokids")
+#cursor = db.cursor()
 
 recent_history = {}
 
@@ -24,15 +24,6 @@ def vis():
 
 average_result = {}
 
-def make_rgb_scale(emotion):
-	rgb = ((255*emotion)/1-sqrt(emotion))
-	if(rgb > 255):
-		return 255
-	elif(rgb < 0):
-		return 0
-	else:
-		return rgb
-
 @socketio.on('emotions')
 def handle_emotions(emotions):
     # print(request.sid, emotions)
@@ -45,12 +36,9 @@ def handle_emotions(emotions):
     avg = []
     for sums in final_sums:
 		  avg.append(sums/number_of_people)
-    emotions_RGB_scale = []
-    for emotion in emotions:
-		emotions_RGB_scale.append(make_rgb_scale(emotion))
-    emit("emotions", {'user': request.sid, 'count':len(recent_history), 'emotions': emotions, 'averages': avg, 'rgb_scale':emotions_RGB_scale}, namespace='/vis', broadcast=True)
-    cursor.execute("INSERT INTO emotions VALUES (NULL, %s, %s, %s, %s, %s, NOW());", [(request.sid), emotions[0], emotions[1], emotions[2], emotions[3]])
-    db.commit()
+    emit("emotions", {'user': request.sid, 'count':len(recent_history), 'emotions': emotions, 'averages': avg}, namespace='/vis', broadcast=True)
+    # cursor.execute("INSERT INTO emotions VALUES (NULL, %s, %s, %s, %s, %s, NOW());", [(request.sid), emotions[0], emotions[1], emotions[2], emotions[3]])
+    # db.commit()
 
 @socketio.on('disconnect')
 def handle_disconnect():
