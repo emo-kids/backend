@@ -8,6 +8,7 @@ if [ -z "$1" ]; then
 fi
 
 echo "===> Building bin/"
+rm -rf bin/
 mkdir -p bin/
 cp server.py bin/
 cp nginx.conf bin/
