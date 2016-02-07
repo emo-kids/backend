@@ -12,8 +12,8 @@ mkdir -p bin/
 cp server.py bin/
 cp nginx.conf bin/
 cp emo-kids.conf bin/
-cp -r static bin/static
-cp -r templates bin/templates
+cp -rf static bin/static
+cp -rf templates bin/templates
 
 echo "===> Deploying to ${address}:${remote_path}"
 ssh root@$address /bin/bash << EOF
