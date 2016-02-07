@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit, send, disconnect
 from operator import add
 from math import sqrt
+
 #import MySQLdb
 
 #db = MySQLdb.connect(host="localhost", user="root", passwd="emokids1", db="emokids")
@@ -24,6 +25,14 @@ def vis():
 
 average_result = {}
 
+def generate_colors(emotions):
+    colors = [
+        int(min(255,16*sqrt(emotions[0]*emotions[3]*65536))),
+        int(min(255,8*sqrt(emotions[1]*emotions[3]*65536))),
+        int(min(255,6*sqrt(emotions[2]*emotions[3]*65536)))
+    ]
+    return colors
+
 @socketio.on('emotions')
 def handle_emotions(emotions):
     # print(request.sid, emotions)
@@ -36,7 +45,7 @@ def handle_emotions(emotions):
     avg = []
     for sums in final_sums:
 		  avg.append(sums/number_of_people)
-    emit("emotions", {'user': request.sid, 'count':len(recent_history), 'emotions': emotions, 'averages': avg}, namespace='/vis', broadcast=True)
+    emit("emotions", {'user': request.sid, 'count':len(recent_history), 'emotions': generate_colors(emotions), 'averages': generate_colors(avg)}, namespace='/vis', broadcast=True)
     # cursor.execute("INSERT INTO emotions VALUES (NULL, %s, %s, %s, %s, %s, NOW());", [(request.sid), emotions[0], emotions[1], emotions[2], emotions[3]])
     # db.commit()
 

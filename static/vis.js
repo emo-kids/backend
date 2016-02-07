@@ -1,6 +1,6 @@
 var socket,
     vis,
-    endpoint = "http://" + document.domain + ":" + location.port + "/vis"
+    endpoint = "//" + document.domain + ":" + location.port + "/vis"
 
 
 var Visualizer = function() {
@@ -9,8 +9,8 @@ var Visualizer = function() {
   this._playing = false
   this._count = 0
   this._dcount = 0
-  this._mean = [0,0,0,0]
-  this._dmean = [0,0,0,0]
+  this._mean = [0,0,0]
+  this._dmean = [0,0,0]
   this._intensity = 0
   this._dintensity = 0
 
@@ -74,20 +74,11 @@ var Visualizer = function() {
   Ticker.setFPS(24)
 }
 
-function generateColors(person) {
-  var colors = [
-    Math.min((500*Math.sqrt(person[0]*person[3]))|0,255),
-    Math.min((600*Math.sqrt(person[1]*person[3]))|0,255),
-    Math.min((300*Math.sqrt(person[2]*person[3]))|0,255)
-  ]
-  
-  return colors
-
-}
-
 function newCircle(person) {
   var circle = new Shape()
-  var colors = generateColors(person)
+  var colors = person
+  console.log("person", person)
+  console.log("colors", colors)
   circle.graphics.beginFill('rgb('+colors[0]+','+colors[1]+','+colors[2]+')').drawCircle(circle.x, circle.y, 50);
   var a = Math.random() * Math.PI * 2,
       d = Math.random() * 110 + 40;
@@ -105,11 +96,12 @@ function newCircle(person) {
 }
 
 function updateCircle(circle, person) {
-  var colors = generateColors(person)
+  var colors = person
   
   circle.graphics.beginFill('rgb('+colors[0]+','+colors[1]+','+colors[2]+')').drawCircle(0, 0, 50);
-  circle.graphics.beginFill(Graphics.getRGB(colors[0], colors[1], colors[2], Math.random() * .1 + .1)).drawCircle(0, 0, 50);
+  //circle.graphics.beginFill(Graphics.getRGB(colors[0], colors[1], colors[2], Math.random() * .2 + .2), 100, Math.random() * 5 + 90, 1).drawPolyStar(0, 0, 20, 6);
 
+  console.log(colors)
   focalDistance = 350
   circle.velX += circle.x * -.005;
   circle.velY += circle.y * -.005;
@@ -120,9 +112,9 @@ function updateCircle(circle, person) {
   var p = focalDistance / (circle.z + 400);
   circle.x = circle._x * p;
   circle.y = circle._y * p;
-  var intensity = person[0] + person[1] + person[2] + person[3]
-  circle.scaleX = circle.scaleY = intensity * p * .5;
-  circle.alpha = 1 
+  var intensity = person[0] + person[1] + person[2]
+  circle.scaleX = circle.scaleY = intensity / 1000 * p * .5;
+  circle.alpha = intensity / 1000 
 }
 
 Visualizer.prototype.onData = function(data) {
@@ -138,13 +130,16 @@ Visualizer.prototype.onData = function(data) {
   this._people[id] = emotions
   this._intensity = 0
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 3; i++) {
     this._dmean[i] = this._mean[i] - averages[i]
     this._intensity += averages[i]
     this._dintensity += this._dmean[i]
   } 
 
-  this._mean = averages
+  var fix = 250
+  this._intensity /= fix
+  this._dintensity /= fix
+
 }
 
 Visualizer.prototype.tick = function() {
@@ -153,19 +148,16 @@ Visualizer.prototype.tick = function() {
     scanLines.graphics.beginBitmapFill(scanLineImage).drawRect(0, 0, canvas.width + 1, canvas.height + 1)
     stage.addChild(bg, glow, backCircles, backSphere, light, frontSphere, frontCircles, scanLines, fpsFld)
     stage.clear();
+    return
   }
   star.rotation += this._dintensity
   star2.rotation = -star.rotation
   glow.alpha = this._intensity * 0.1
   light.alpha = (this._intensity * this._dintensity) * 0.2
-  glow.scaleX = glow.scaleY = star.scaleX = star.scaleY = this._count * 0.5
+  glow.scaleX = glow.scaleY = star.scaleX = star.scaleY = this._count * 0.7
   bg.alpha =  this._intensity - .1
   scanLines.alpha = 1 - this._intensity * this._dintensity * .8
   var s = this._intensity * this._dintensity * .8 
-
-  // var colors = generateColors(this._mean)
-  // glow..graphics.beginFill('rgb('+colors[0]+','+colors[1]+','+colors[2]+')').drawCircle(0, 0, 50);
-
 
   for (var id in this._people) {
     var person = this._people[id]
