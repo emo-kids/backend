@@ -123,7 +123,7 @@ Visualizer.prototype.onEmotions = function(emotions) {
   console.log("emoting")
   
   var id = emotions[0]
-  this._people[id] = emotions.slice(1)
+  // this._people[id] = emotions.slice(1)
   //console.log(this._people[id])
 }
 
@@ -207,6 +207,7 @@ function init() {
 
   socket.on('emotions', vis.onEmotions.bind(vis))
   socket.on('avg', vis.onAvg.bind(vis))
+  socket.on('disconnected', function(sid) { console.log(sid) })
 }
 
 window.addEventListener('load', init, false)
