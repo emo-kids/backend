@@ -26,12 +26,13 @@ var Visualizer = function() {
   var screen = new Shape()
   screen.graphics.beginFill("rgba(16,16,16,.25)").drawRect(0, 0, w + 1, h + 1)
   star = new Shape()
-  star.graphics.beginFill(Graphics.getRGB(128, 40, 255, .03)).drawPolyStar(0, 0, h * .7, 48, .95)
-  star.graphics.beginFill(Graphics.getRGB(128, 40, 255, .18)).drawPolyStar(0, 0, h * .75, 6, .93)
-  star.graphics.beginFill(Graphics.getRGB(128, 40, 255, .05)).drawPolyStar(0, 0, h * .72, 24, .93)
+  star.graphics.beginFill(Graphics.getRGB(128, 40, 255, .03)).drawPolyStar(0, 0, h * .3, 48, .95)
+  star.graphics.beginFill(Graphics.getRGB(128, 40, 255, .18)).drawPolyStar(0, 0, h * .35, 6, .93)
+  star.graphics.beginFill(Graphics.getRGB(128, 40, 255, .05)).drawPolyStar(0, 0, h * .32, 24, .93)
   star.compositeOperation = "lighter"
   star2 = star.clone()
-  star2.alpha = .4
+  star.alpha = .2
+  star2.alpha = .2
   bg = new Container()
   bg.addChild(star, star2)
   fpsFld = new Text("", "10px Arial", "#FFF")
@@ -46,7 +47,7 @@ var Visualizer = function() {
   frontSphere.graphics.drawCircle(0, 0, r)
   glow = new Shape()
   glow.graphics.beginRadialGradientFill(["rgba(230,180,255,.5)", "rgba(10,30,255,0)"], [0, 1], 0, 0, 0, 0, 0, w / 2).drawCircle(0, 0, w / 2)
-  glow.graphics.beginFill("rgba(128,0,128,.1)").drawCircle(0, 0, r * 3)
+  glow.graphics.beginFill("rgba(128,0,128,.1)").drawCircle(0, 0, r)
   glow.graphics.beginFill("rgba(160,128,255,.1)").drawCircle(0, 0, r * 2)
   glow.compositeOperation = "lighter"
   light = new Shape()
@@ -57,7 +58,8 @@ var Visualizer = function() {
   scanLines = new Shape()
   bg.x = canvas.width / 2
   bg.y = canvas.height / 2
-  bg.scaleX = canvas.width / canvas.height
+  bg.addChild(light, glow)
+  bg.scaleX = canvas.width / canvas.height /2
   frontCircles = new Container()
   backCircles = new Container()
   frontCircles.x = backCircles.x = w / 2
@@ -69,22 +71,26 @@ var Visualizer = function() {
   loadingFld.y = h / 2
   stage.addChild(screen, fpsFld, loadingFld)
   stage.update()
-  Ticker.setFPS(20)
-  console.log("visualizer instantiated")
+  Ticker.setFPS(24)
 }
 
 function generateColors(person) {
-  return [100,100,100]
+  var colors = [
+    Math.min((500*Math.sqrt(person[0]*person[3]))|0,255),
+    Math.min((600*Math.sqrt(person[1]*person[3]))|0,255),
+    Math.min((300*Math.sqrt(person[2]*person[3]))|0,255)
+  ]
+  
+  return colors
+
 }
 
 function newCircle(person) {
   var circle = new Shape()
-  circle.compositeOperation = "lighter"
   var colors = generateColors(person)
-  circle.graphics.beginFill(Graphics.getRGB(colors[0], colors[1], colors[2], 
-    Math.random() * .1 + .1)).drawCircle(0, 0, 50);
-  // circle.graphics.beginFill(Graphics.getRGB(55, 30, 65, 
-  //   Math.random() * .2 + .2), 100, Math.random() * 5 + 90, 1).drawPolyStar(0, 0, 20, 6);
+  console.log("colors:")
+  console.log(colors)
+  circle.graphics.beginFill('rgb('+colors[0]+','+colors[1]+','+colors[2]+')').drawCircle(circle.x, circle.y, 50);
   var a = Math.random() * Math.PI * 2,
       d = Math.random() * 110 + 40;
   circle._x = Math.cos(a) * d;
@@ -95,15 +101,17 @@ function newCircle(person) {
   circle.velX = Math.cos(a) * d;
   circle.velY = Math.sin(a) * d;
   circle.velZ = Math.random() * 30 - 15;
-  circle.alpha = .5;
+  circle.alpha = .9;
 
   return circle
 }
 
 function updateCircle(circle, person) {
   var colors = generateColors(person)
-  circle.graphics.beginFill(Graphics.getRGB(colors[0], colors[1], colors[2], 
-    Math.random() * .1 + .1)).drawCircle(0, 0, 50)
+  
+  circle.graphics.beginFill('rgb('+colors[0]+','+colors[1]+','+colors[2]+')').drawCircle(0, 0, 50);
+  circle.graphics.beginFill(Graphics.getRGB(colors[0], colors[1], colors[2], Math.random() * .1 + .1)).drawCircle(0, 0, 50);
+
   focalDistance = 350
   circle.velX += circle.x * -.005;
   circle.velY += circle.y * -.005;
@@ -115,80 +123,77 @@ function updateCircle(circle, person) {
   circle.x = circle._x * p;
   circle.y = circle._y * p;
   var intensity = person[0] + person[1] + person[2] + person[3]
-  circle.scaleX = circle.scaleY = (/* vol.left * vol.left */ intensity * 1.1 + .4) * p * 2;
-  circle.alpha = intensity /* vol.left + vol.right */ + .4;
+  circle.scaleX = circle.scaleY = intensity * p * .5;
+
+  circle.alpha = 1 
 }
 
-Visualizer.prototype.onEmotions = function(emotions) {
-  console.log("emoting")
-  
-  var id = emotions[0]
-  this._people[id] = emotions.slice(1)
-  //console.log(this._people[id])
-}
+Visualizer.prototype.onData = function(data) {
+  // console.log("emoting")
 
-Visualizer.prototype.onAvg = function(avg) {
-  console.log("avg")
-
-  var count = avg[0]
-  var next_mean = avg.slice(1)
-
+  var id = data["user"]
+  var count = data["count"]
   this._dcount = this._count - count
   this._count = count
+  var emotions = data["emotions"]
+  var averages = data["averages"]
+
+  this._people[id] = emotions
+  this._intensity = 0
 
   for (i = 0; i < 4; i++) {
-    this._dmean[i] = this._mean[i] - next_mean[i]
-    this._intensity += next_mean[i]
+    this._dmean[i] = this._mean[i] - averages[i]
+    this._intensity += averages[i]
     this._dintensity += this._dmean[i]
   } 
 
-  this._mean = next_mean
+  this._mean = averages
 }
 
 Visualizer.prototype.tick = function() {
-  console.log("ugh - ticking")
   if (!this._playing) {
     this._playing = true
     scanLines.graphics.beginBitmapFill(scanLineImage).drawRect(0, 0, canvas.width + 1, canvas.height + 1)
-    //stage.removeChild(loadingFld);
     stage.addChild(bg, glow, backCircles, backSphere, light, frontSphere, frontCircles, scanLines, fpsFld)
     stage.clear();
   }
-  star.rotation += this._dintensity //avgVol.right * avgVol.left * 4 - .3;
+  star.rotation += this._dintensity
   star2.rotation = -star.rotation
-  glow.alpha = this._intensity //vol.right;
-  light.alpha = this._intensity * this._dintensity //avgVol.right * avgVol.left;
-  glow.scaleX = glow.scaleY = star.scaleX = star.scaleY = this._count //vol.right * vol.right * .8 + .5;
-  bg.alpha =  this._intensity * .5 - .1 //vol.left * .5 - .1;
-  scanLines.alpha = 1 - this._intensity * this._dintensity * .7//1 - vol.right * vol.left * .7;
-  //frontSphere.alpha = //Math.min(1, 3 - light.alpha * 2.6);
-  var s = this._intensity * this._dintensity * .8 //avgVol.right * avgVol.right * .8 + .3;
-    frontCircles.scaleX = frontCircles.scaleY = backCircles.scaleX = backCircles.scaleY = Math.max(s, backCircles.scaleX + (s - backCircles.scaleX) * .1);
-    frontSphere.scaleX = frontSphere.scaleY = backSphere.scaleX = backSphere.scaleY = light.scaleX = light.scaleY = 1 + this._intensity * this._dintensity * .6//avgVol.right * avgVol.right * .6;
+  glow.alpha = this._intensity * 0.1
+  light.alpha = (this._intensity * this._dintensity) * 0.2
+  glow.scaleX = glow.scaleY = star.scaleX = star.scaleY = this._count * 0.5
+  bg.alpha =  this._intensity - .1
+  scanLines.alpha = 1 - this._intensity * this._dintensity * .8
+  var s = this._intensity * this._dintensity * .8 
+
+  // var colors = generateColors(this._mean)
+  // glow..graphics.beginFill('rgb('+colors[0]+','+colors[1]+','+colors[2]+')').drawCircle(0, 0, 50);
+
 
   for (var id in this._people) {
     var person = this._people[id]
-    //if (object.hasOwnProperty(person)) {
     var circle = this._circles[id]
-    if (typeof circle === "undefined") {
+    if (!circle) {
       this._circles[id] = newCircle(person)
       circle = this._circles[id]
     } else {
       updateCircle(this._circles[id], person)
-    }
+  }
 
-    if (circle.z > 0) {
-      if (Math.sqrt(circle.x * circle.x + circle.y * circle.y) < 60 || 
-        (Math.random() < .15 && circle.z >= 100)) {
-          if (circle.parent) {
-              circle.parent.removeChild(circle);
-          }
-        } else {
-            backCircles.addChild(circle);
-        }
-      } else {
-          frontCircles.addChild(circle);
-      }
+    backCircles.addChild(circle);
+    frontCircles.addChild(circle);
+  //   if (circle.z > 0) {
+  //     if (Math.sqrt(circle.x * circle.x + circle.y * circle.y) < 60 || 
+  //       (Math.random() < .15 && circle.z >= 100)) {
+  //         if (circle.parent) {
+  //             circle.parent.removeChild(circle);
+  //         }
+  //       } else {
+  //           backCircles.addChild(circle);
+  //       }
+  //     } else {
+  //         frontCircles.addChild(circle);
+  //     }
   }
   stage.update()
 }
@@ -202,11 +207,10 @@ function init() {
   vis = new Visualizer()
 
   socket.on('connect', function() {
-    console.log("connected to "+ endpoint)
+    // console.log("connected to "+ endpoint)
   })
 
-  socket.on('emotions', vis.onEmotions.bind(vis))
-  socket.on('avg', vis.onAvg.bind(vis))
+  socket.on('emotions', vis.onData.bind(vis))
 }
 
 window.addEventListener('load', init, false)

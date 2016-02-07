@@ -24,15 +24,6 @@ def vis():
 
 average_result = {}
 
-def make_rgb_scale(emotion):
-	rgb = ((255*emotion)/1-sqrt(emotion))
-	if(rgb > 255):
-		return 255
-	elif(rgb < 0):
-		return 0
-	else:
-		return rgb
-
 @socketio.on('emotions')
 def handle_emotions(emotions):
     # print(request.sid, emotions)
@@ -46,9 +37,7 @@ def handle_emotions(emotions):
     for sums in final_sums:
 		  avg.append(sums/number_of_people)
     emotions_RGB_scale = []
-    for emotion in emotions:
-		emotions_RGB_scale.append(make_rgb_scale(emotion))
-    emit("emotions", {'user': request.sid, 'count':len(recent_history), 'emotions': emotions, 'averages': avg, 'rgb_scale':emotions_RGB_scale}, namespace='/vis', broadcast=True)
+    emit("emotions", {'user': request.sid, 'count':len(recent_history), 'emotions': emotions, 'averages': avg}, namespace='/vis', broadcast=True)
     # cursor.execute("INSERT INTO emotions VALUES (NULL, %1.8f, %1.8f, %1.8f, %1.8f, NOW())", emotions(0), emotions(1), emotions(2), emotions(3))
     # db.commit()
 
