@@ -97,7 +97,7 @@ function newCircle(person) {
 
 function updateCircle(circle, person) {
   var colors = person
-  
+
   circle.graphics.beginFill('rgb('+colors[0]+','+colors[1]+','+colors[2]+')').drawCircle(0, 0, 50);
   //circle.graphics.beginFill(Graphics.getRGB(colors[0], colors[1], colors[2], Math.random() * .2 + .2), 100, Math.random() * 5 + 90, 1).drawPolyStar(0, 0, 20, 6);
 
@@ -114,7 +114,7 @@ function updateCircle(circle, person) {
   circle.y = circle._y * p;
   var intensity = person[0] + person[1] + person[2]
   circle.scaleX = circle.scaleY = intensity / 1000 * p * .5;
-  circle.alpha = intensity / 1000 
+  circle.alpha = intensity / 1000
 }
 
 Visualizer.prototype.onData = function(data) {
@@ -134,7 +134,7 @@ Visualizer.prototype.onData = function(data) {
     this._dmean[i] = this._mean[i] - averages[i]
     this._intensity += averages[i]
     this._dintensity += this._dmean[i]
-  } 
+  }
 
   var fix = 250
   this._intensity /= fix
@@ -157,7 +157,7 @@ Visualizer.prototype.tick = function() {
   glow.scaleX = glow.scaleY = star.scaleX = star.scaleY = this._count * 0.7
   bg.alpha =  this._intensity - .1
   scanLines.alpha = 1 - this._intensity * this._dintensity * .8
-  var s = this._intensity * this._dintensity * .8 
+  var s = this._intensity * this._dintensity * .8
 
   for (var id in this._people) {
     var person = this._people[id]
@@ -172,7 +172,7 @@ Visualizer.prototype.tick = function() {
     backCircles.addChild(circle);
     frontCircles.addChild(circle);
   //   if (circle.z > 0) {
-  //     if (Math.sqrt(circle.x * circle.x + circle.y * circle.y) < 60 || 
+  //     if (Math.sqrt(circle.x * circle.x + circle.y * circle.y) < 60 ||
   //       (Math.random() < .15 && circle.z >= 100)) {
   //         if (circle.parent) {
   //             circle.parent.removeChild(circle);
